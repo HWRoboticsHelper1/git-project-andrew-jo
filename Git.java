@@ -1,8 +1,13 @@
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 class Git {
     public static void main(String[] args) {
         initializeRepo();
+        System.out.println(hashFile("TestFile.txt"));
     }
 
     public static void initializeRepo() {
@@ -40,5 +45,75 @@ class Git {
         } else {
             System.out.println("Git Repository Already Exists");
         }
+    }
+
+    public static String hashFile(String filePath) {
+        try {
+            String content = extractContent(filePath);
+            return hashContent(content);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static String extractContent(String filePath) throws FileNotFoundException {
+        File f = new File(filePath);
+        if (!f.exists()) {
+            throw new FileNotFoundException("File doesn't exist");
+        }
+        StringBuilder content = new StringBuilder();
+        String line = "";
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(f))) {
+            line = bufferedReader.readLine();
+            while (line != null) {
+                content.append(line);
+                line = bufferedReader.readLine();
+                if (line != null) {
+                    content.append("\n");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return content.toString();
+    }
+
+    public static String hashContent(String content) {
+        byte[] hashVal = new byte[0];
+        try {
+            hashVal = getSHA(content);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        String hexaHash = toHexString(hashVal);
+
+        return hexaHash;
+    }
+
+    public static byte[] getSHA(String input) throws NoSuchAlgorithmException {
+        // Static getInstance method is called with hashing SHA
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+
+        // digest() method called
+        // to calculate message digest of an input
+        // and return array of byte
+        return md.digest(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String toHexString(byte[] hash) {
+        // Convert byte array into signum representation
+        BigInteger number = new BigInteger(1, hash);
+
+        // Convert message digest into hex value
+        StringBuilder hexString = new StringBuilder(number.toString(16));
+
+        // Pad with leading zeros
+        while (hexString.length() < 32) {
+            hexString.insert(0, '0');
+        }
+
+        return hexString.toString();
     }
 }
