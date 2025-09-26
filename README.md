@@ -5,3 +5,6 @@ Call initializeRepo() to create the basic infrastructure for a git project. It'l
 
 hashFile:
 The hashFile function takes in a file path and returns the hexstring of the contents of the file hashed by SHA-1. It usues two helper functions, extractContent, which tries to open the file and get the content in the file. Will throw a FileNotFoundException if the file path doesn't exist. Then, hashContent will take the content and return the hash string in hex, using helper functions getSHA to do the hashing and toHexString to turn it to hex.
+
+blobFile:
+Call blobFile on a filePath to create a file in git/objects that will have a fileName based on the hash of the contents of the original file and then populate it with the contents of the original file. Full tester is avialable in GitTester.java
