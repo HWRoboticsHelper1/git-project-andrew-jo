@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 class Git {
     public static void main(String[] args) {
         initializeRepo();
-        System.out.println(hashFile("TestFile.txt"));
     }
 
     public static void initializeRepo() {
@@ -64,11 +63,11 @@ class Git {
         }
         StringBuilder content = new StringBuilder();
         String line = "";
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(f))) {
-            line = bufferedReader.readLine();
+        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+            line = br.readLine();
             while (line != null) {
                 content.append(line);
-                line = bufferedReader.readLine();
+                line = br.readLine();
                 if (line != null) {
                     content.append("\n");
                 }
@@ -110,10 +109,42 @@ class Git {
         StringBuilder hexString = new StringBuilder(number.toString(16));
 
         // Pad with leading zeros
-        while (hexString.length() < 32) {
+        while (hexString.length() < 40) {
             hexString.insert(0, '0');
         }
 
         return hexString.toString();
+    }
+
+    public static void blobFile(String filePath) throws FileNotFoundException {
+        String hashedFile = hashFile(filePath);
+        if (hashedFile.equals("")) {
+            throw new FileNotFoundException();
+        }
+        String blobFilePath = "git/objects/" + hashedFile;
+        File blobFile = new File(blobFilePath);
+        if (!blobFile.exists()) {
+            try {
+                blobFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(new File(filePath)))) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(blobFile))) {
+                String line = br.readLine();
+                while (line != null) {
+                    bw.write(line);
+                    line = br.readLine();
+                    if (line != null) {
+                        bw.write("\n");
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
